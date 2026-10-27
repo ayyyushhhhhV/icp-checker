@@ -1,0 +1,12 @@
+Extract people who work at "{{ company_name }}" from these Google search results for LinkedIn profiles.
+
+Use only the provided text (result titles and snippets). Do not guess names or titles. If the title is not
+in the text, return null. `link` must be copied exactly from the result. Only include people whose result text
+indicates they currently work at "{{ company_name }}" (return `company` as written in the text).
+
+## Search results
+{% for r in results %}
+- title: {{ r.title }}
+  link: {{ r.link }}
+  snippet: {{ r.snippet }}
+{% endfor %}

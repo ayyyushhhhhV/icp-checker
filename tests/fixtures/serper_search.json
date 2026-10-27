@@ -1,0 +1,44 @@
+{
+  "site:linkedin.com/in \"Jane Doe\" \"Acme Retail\"": {
+    "organic": [
+      {
+        "title": "Jane Doe - Head of Talent Acquisition - Acme Retail | LinkedIn",
+        "link": "https://in.linkedin.com/in/jane-doe-123",
+        "snippet": "Head of Talent Acquisition at Acme Retail. Bengaluru."
+      }
+    ]
+  },
+  "stakeholders:Acme Retail": {
+    "organic": [
+      {
+        "title": "Rahul Sharma - TA Director - Acme Retail | LinkedIn",
+        "link": "https://in.linkedin.com/in/rahul-sharma-ta",
+        "snippet": "TA Director at Acme Retail. Leading hiring for 300 stores."
+      },
+      {
+        "title": "Someone Else - Engineer - Other Co | LinkedIn",
+        "link": "https://in.linkedin.com/in/someone-else",
+        "snippet": "Engineer at Other Co."
+      }
+    ]
+  },
+  "site:linkedin.com/in/rahul-sharma-ta": {
+    "organic": [
+      {
+        "title": "Rahul Sharma - TA Director - Acme Retail | LinkedIn",
+        "link": "https://in.linkedin.com/in/rahul-sharma-ta",
+        "snippet": "TA Director at Acme Retail. Experience: Acme Retail \u00b7 Location: Bengaluru"
+      }
+    ]
+  },
+  "site:linkedin.com/in/nobody-here": {
+    "organic": []
+  },
+  "\"Acme Retail\" official website": {
+    "knowledgeGraph": {
+      "title": "Acme Retail",
+      "website": "https://www.acme.com/"
+    },
+    "organic": []
+  }
+}

@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ICP Checker</title>
+<style>
+  :root { --bg:#f7f7f8; --card:#fff; --text:#1d1d1f; --muted:#6b6b76; --line:#e3e3e8; --accent:#2f5bea;
+          --ideal:#1f8a4c; --good:#4f8f2f; --wrong:#b7791f; --nf:#9b2c2c; --cnf:#6b46c1; }
+  * { box-sizing:border-box; }
+  body { margin:0; font:14px/1.45 system-ui,-apple-system,Segoe UI,sans-serif; background:var(--bg); color:var(--text); }
+  main { max-width:1280px; margin:0 auto; padding:20px 16px 60px; }
+  h1 { font-size:20px; margin:0 0 16px; } h2 { font-size:16px; margin:0 0 12px; }
+  section { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:16px; margin-bottom:16px; }
+  label { display:block; font-weight:600; margin:10px 0 4px; }
+  textarea, input, select { width:100%; font:inherit; padding:7px 9px; border:1px solid var(--line); border-radius:6px; background:#fff; }
+  textarea.json { font:12px/1.4 ui-monospace,Menlo,monospace; min-height:320px; }
+  button { font:inherit; padding:7px 14px; border-radius:6px; border:1px solid var(--accent); background:var(--accent); color:#fff; cursor:pointer; }
+  button.secondary { background:#fff; color:var(--accent); }
+  button:disabled { opacity:.5; cursor:default; }
+  .row { display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-top:10px; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:8px; }
+  .muted { color:var(--muted); } .err { color:var(--nf); white-space:pre-wrap; }
+  .pill { display:inline-block; padding:2px 8px; border-radius:999px; font-size:12px; font-weight:600; color:#fff; white-space:nowrap; }
+  .ideal{background:var(--ideal)} .good{background:var(--good)} .wrong_contact{background:var(--wrong)}
+  .not_a_fit{background:var(--nf)} .contact_not_found{background:var(--cnf)} .pending{background:#999}
+  .tablewrap { overflow-x:auto; }
+  table { border-collapse:collapse; width:100%; min-width:900px; }
+  th, td { text-align:left; vertical-align:top; padding:8px 6px; border-bottom:1px solid var(--line); }
+  th { font-size:12px; color:var(--muted); font-weight:600; }
+  td.score { font-weight:700; font-size:16px; }
+  .stats { display:flex; gap:14px; flex-wrap:wrap; margin:6px 0 10px; }
+  .small { font-size:12px; } a { color:var(--accent); }
+  .tabs { display:flex; gap:4px; margin:14px 0 12px; border-bottom:1px solid var(--line); }
+  .tab { background:none; color:var(--muted); border:none; border-bottom:2px solid transparent; border-radius:0; padding:8px 12px; }
+  .tab.active { color:var(--accent); border-bottom-color:var(--accent); font-weight:600; }
+  details summary { cursor:pointer; color:var(--accent); font-size:12px; }
+</style>
+</head>
+<body>
+<main>
+<h1>ICP Checker <span class="muted small">prototype</span></h1>
+
+<section>
+  <h2>1. Ideal Customer Profile</h2>
+  <div class="grid">
+    <div><label>Existing ICP</label><select id="icpSelect"><option value="">— new —</option></select></div>
+    <div><label>Team</label><input id="team" value="hr_talent"></div>
+  </div>
+  <label>Describe the offering (who it's for, problems solved, best customers, regions)</label>
+  <textarea id="offering" rows="4" placeholder="e.g. AI recruiting assistant for high-volume hiring. Best customers: retail and logistics chains in India and UAE with 500–10,000 employees..."></textarea>
+  <div class="row"><button id="draftBtn">Draft ICP with AI</button><span id="icpMsg" class="muted"></span></div>
+  <label>ICP (edit freely; weights must sum to 100)</label>
+  <textarea id="icpJson" class="json" spellcheck="false"></textarea>
+  <div class="row">
+    <button class="secondary" id="saveBtn">Save draft</button>
+    <button id="approveBtn">Approve → new version</button>
+    <span id="versions" class="muted"></span>
+  </div>
+</section>
+
+<section>
+  <h2>2. Leads</h2>
+  <div class="grid"><div><label>Score against ICP version</label><select id="runVersion"></select></div></div>
+  <div class="tabs">
+    <button class="tab active" data-tab="csvPanel">Upload CSV</button>
+    <button class="tab" data-tab="singlePanel">Single lead (LinkedIn + company)</button>
+  </div>
+
+  <div id="csvPanel" class="panel">
+    <input type="file" id="csvFile" accept=".csv">
+    <div id="mappingBox" hidden>
+      <p class="muted small" id="uploadInfo"></p>
+      <p class="muted small">Tip: a row can be just a LinkedIn profile URL or ID — name, title and company are filled from Google's search result for it (the profile page is never opened).</p>
+      <div class="grid" id="mapping"></div>
+      <div class="row"><button id="startBtn">Score list</button></div>
+    </div>
+  </div>
+
+  <div id="singlePanel" class="panel" hidden>
+    <div class="grid">
+      <div><label>LinkedIn profile URL or ID</label><input id="sLinkedin" placeholder="https://in.linkedin.com/in/jane-doe or jane-doe"></div>
+      <div><label>Company name</label><input id="sCompany" placeholder="Acme Retail"></div>
+    </div>
+    <details style="margin-top:8px"><summary>Optional fields</summary>
+      <div class="grid">
+        <div><label>Name</label><input id="sName"></div>
+        <div><label>Title</label><input id="sTitle"></div>
+        <div><label>Company website</label><input id="sWebsite" placeholder="acme.com"></div>
+      </div>
+    </details>
+    <p class="muted small">The LinkedIn profile is looked up through Google search results only; the page is never opened.
+      Company name is recommended — if empty, it is taken from the search result.</p>
+    <div class="row"><button id="singleBtn">Score lead</button><span id="singleMsg" class="muted"></span></div>
+  </div>
+
+  <div class="row small"><span class="muted">Or open a previous list:</span><select id="listSelect" style="max-width:360px"></select></div>
+</section>
+
+<section id="results" hidden>
+  <h2>3. Results <span id="listStatus" class="muted small"></span></h2>
+  <div class="stats" id="stats"></div>
+  <div class="row">
+    <select id="filter" style="max-width:220px">
+      <option value="">All categories</option><option>ideal</option><option>good</option>
+      <option>wrong_contact</option><option>contact_not_found</option><option>not_a_fit</option>
+    </select>
+    <a id="exportLink" href="#">Download CSV</a>
+    <select id="rescoreVersion" style="max-width:240px"></select>
+    <button class="secondary" id="rescoreBtn">Re-score (no new research)</button>
+  </div>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Category</th><th>Score</th><th>Company / Lead</th><th>Why</th><th>Stakeholders</th><th>Evidence</th><th></th></tr></thead>
+    <tbody id="rows"></tbody>
+  </table></div>
+</section>
+</main>
+
+<script>
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const FIELDS = ["name","title","company","linkedin_url","email","website"];
+const FIELD_LABELS = {linkedin_url: "linkedin (profile URL or ID)"};
+let currentList = null, pollTimer = null;
+
+async function api(path, opts = {}) {
+  const r = await fetch(path, opts);
+  if (!r.ok) throw new Error((await r.json().catch(() => ({}))).detail || r.statusText);
+  return r.headers.get("content-type")?.includes("json") ? r.json() : r.text();
+}
+const post = (path, body) => api(path, {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(body)});
+
+async function loadIcps(selectId) {
+  const icps = await api("/icps");
+  const sel = $("icpSelect"), keep = selectId ?? sel.value;
+  sel.innerHTML = '<option value="">— new —</option>' + icps.map(i =>
+    `<option value="${i.id}">${esc(i.name)} (${esc(i.team)}) ${i.latest_version ? "v" + i.latest_version : "draft"}</option>`).join("");
+  sel.value = keep || "";
+  const opts = [];
+  for (const i of icps) {
+    const vs = await api(`/icps/${i.id}/versions`);
+    vs.forEach(v => opts.push(`<option value="${i.id}|${v.version}">${esc(i.name)} v${v.version}</option>`));
+  }
+  const html = opts.length ? opts.reverse().join("") : '<option value="">approve an ICP first</option>';
+  $("runVersion").innerHTML = html; $("rescoreVersion").innerHTML = html;
+}
+
+$("icpSelect").onchange = async () => {
+  const id = $("icpSelect").value;
+  if (!id) { $("icpJson").value = ""; $("versions").textContent = ""; return; }
+  const doc = await api(`/icps/${id}`);
+  const latest = doc.draft || doc.versions.at(-1);
+  $("icpJson").value = JSON.stringify(latest, null, 2);
+  $("versions").textContent = doc.versions.length ? `approved versions: ${doc.versions.map(v => "v" + v.version).join(", ")}` : "not approved yet";
+};
+
+$("draftBtn").onclick = async () => {
+  $("draftBtn").disabled = true; $("icpMsg").textContent = "Drafting…";
+  try {
+    const icp = await post("/icps/draft", {offering_text: $("offering").value, team: $("team").value});
+    $("icpJson").value = JSON.stringify(icp, null, 2); $("icpSelect").value = "";
+    $("icpMsg").textContent = "Draft ready — review, edit, then save and approve.";
+  } catch (e) { $("icpMsg").innerHTML = `<span class="err">${esc(e.message)}</span>`; }
+  $("draftBtn").disabled = false;
+};
+
+async function saveDraft() {
+  const icp = await post("/icps", JSON.parse($("icpJson").value));
+  $("icpJson").value = JSON.stringify(icp, null, 2);
+  return icp;
+}
+$("saveBtn").onclick = async () => {
+  try { const icp = await saveDraft(); $("icpMsg").textContent = "Saved."; await loadIcps(icp.id); $("icpSelect").onchange(); }
+  catch (e) { $("icpMsg").innerHTML = `<span class="err">${esc(e.message)}</span>`; }
+};
+$("approveBtn").onclick = async () => {
+  try {
+    const icp = await saveDraft();
+    const v = await post(`/icps/${icp.id}/approve`, {});
+    $("icpMsg").textContent = `Approved as v${v.version}.`; await loadIcps(icp.id); $("icpSelect").onchange();
+  } catch (e) { $("icpMsg").innerHTML = `<span class="err">${esc(e.message)}</span>`; }
+};
+
+$("csvFile").onchange = async () => {
+  const f = $("csvFile").files[0]; if (!f) return;
+  const fd = new FormData(); fd.append("file", f);
+  try {
+    const res = await api("/lists", {method: "POST", body: fd});
+    currentList = res.id;
+    $("uploadInfo").textContent = `${res.rows} rows. Confirm the column mapping:`;
+    $("mapping").innerHTML = FIELDS.map(fld => `<div><label>${FIELD_LABELS[fld] || fld}</label><select data-field="${fld}">
+      <option value="">(none)</option>${res.columns.map(c => `<option ${res.proposed_mapping[fld] === c ? "selected" : ""}>${esc(c)}</option>`).join("")}
+      </select></div>`).join("");
+    $("mappingBox").hidden = false;
+  } catch (e) { alert(e.message); }
+};
+
+$("startBtn").onclick = async () => {
+  const [icp_id, version] = $("runVersion").value.split("|");
+  if (!icp_id) return alert("Approve an ICP first.");
+  const mapping = {};
+  document.querySelectorAll("#mapping select").forEach(s => mapping[s.dataset.field] = s.value || null);
+  try { await post(`/lists/${currentList}/start`, {icp_id, version: +version, mapping}); showList(currentList); loadLists(); }
+  catch (e) { alert(e.message); }
+};
+
+document.querySelectorAll(".tab").forEach(t => t.onclick = () => {
+  document.querySelectorAll(".tab").forEach(x => x.classList.toggle("active", x === t));
+  document.querySelectorAll(".panel").forEach(p => p.hidden = p.id !== t.dataset.tab);
+});
+
+$("singleBtn").onclick = async () => {
+  const [icp_id, version] = $("runVersion").value.split("|");
+  if (!icp_id) return alert("Approve an ICP first.");
+  const lead = {linkedin_url: $("sLinkedin").value.trim() || null, company: $("sCompany").value.trim() || null,
+                name: $("sName").value.trim() || null, title: $("sTitle").value.trim() || null,
+                website: $("sWebsite").value.trim() || null};
+  if (!lead.linkedin_url && !lead.company) return alert("Enter a LinkedIn profile and/or a company name.");
+  $("singleBtn").disabled = true; $("singleMsg").textContent = "Scoring… (usually 15–40 s)";
+  try {
+    const res = await post("/leads/single", {...lead, icp_id, version: +version});
+    showList(res.list_id); loadLists(); $("singleMsg").textContent = "";
+  } catch (e) { $("singleMsg").innerHTML = `<span class="err">${esc(e.message)}</span>`; }
+  $("singleBtn").disabled = false;
+};
+
+$("rescoreBtn").onclick = async () => {
+  const [icp_id, version] = $("rescoreVersion").value.split("|");
+  try { await post(`/lists/${currentList}/rescore`, {icp_id, version: +version}); showList(currentList); }
+  catch (e) { alert(e.message); }
+};
+
+async function loadLists() {
+  const lists = await api("/lists");
+  $("listSelect").innerHTML = '<option value="">—</option>' + lists.reverse().map(l =>
+    `<option value="${l.id}">${esc(l.filename)} · ${l.status} · ${new Date(l.created_at).toLocaleString()}</option>`).join("");
+}
+$("listSelect").onchange = () => { if ($("listSelect").value) showList($("listSelect").value); };
+$("filter").onchange = () => refresh();
+
+function showList(id) {
+  currentList = id; $("results").hidden = false;
+  $("exportLink").href = `/lists/${id}/export.csv`;
+  clearInterval(pollTimer); refresh(); pollTimer = setInterval(refresh, 2500);
+}
+
+async function refresh() {
+  if (!currentList) return;
+  const lst = await api(`/lists/${currentList}`);
+  const u = lst.usage;
+  $("listStatus").textContent = `${lst.status} · ${lst.progress.done}/${lst.progress.total} · ICP v${lst.icp_version ?? "-"} · Serper credits ${u.serper_credits} (cache hits ${u.serper_cache_hits}) · LLM calls ${u.llm_calls}, tokens ${u.prompt_tokens + u.completion_tokens}` + (lst.error ? ` · ERROR ${lst.error}` : "");
+  const c = lst.summary.counts;
+  $("stats").innerHTML = ["ideal","good","wrong_contact","contact_not_found","not_a_fit","failed"].map(k =>
+    `<span><span class="pill ${k === "failed" ? "pending" : k}">${k.replace(/_/g, " ")}</span> ${c[k] || 0}</span>`).join("") +
+    (lst.summary.pct_not_a_fit != null ? `<span class="muted">${lst.summary.pct_not_a_fit}% not a fit</span>` : "");
+  const leads = await api(`/lists/${currentList}/leads?sort=score` + ($("filter").value ? `&category=${$("filter").value}` : ""));
+  $("rows").innerHTML = leads.map(row).join("");
+  if (lst.status !== "running") clearInterval(pollTimer);
+}
+
+function row(l) {
+  const s = l.score, cat = l.final_category;
+  const p = l.person || l.raw_person || {};
+  const li = l.linkedin_profile?.found ? l.linkedin_profile : null;
+  const ev = [...new Map([...(l.company?.evidence || []), ...(p.evidence || [])].filter(e => e.source_url).map(e => [e.source_url, e])).values()];
+  const st = (l.stakeholders || []).map(x => `<div><b>${esc(x.name)}</b> — ${esc(x.title)} <span class="muted">(${x.score.total}${x.relation_to_lead ? ", " + esc(x.relation_to_lead) : ""})</span>
+      ${x.linkedin_url ? `<a href="${esc(x.linkedin_url)}" target="_blank" rel="noopener">profile</a>` : ""}</div>`).join("");
+  return `<tr>
+    <td>${cat ? `<span class="pill ${cat}">${cat.replace(/_/g, " ")}</span>` : `<span class="pill pending">${l.status}</span>`}
+        ${s?.overridden ? `<div class="small muted">overridden (was ${s.category}): ${esc(s.override.reason)}</div>` : ""}
+        ${s ? `<div class="small muted">${s.confidence} confidence</div>` : ""}</td>
+    <td class="score">${s ? s.total : "–"}${s ? `<div class="small muted">co ${s.company_fit.points}/${s.company_fit.max}<br>person ${s.person_fit.points}/${s.person_fit.max}</div>` : ""}</td>
+    <td><b>${esc(l.input.company || li?.company || l.input.website)}</b><div>${esc(l.input.name || li?.name || p.name)}</div>
+        <div class="muted">${esc(p.title || l.input.title || li?.title)}${p.verified ? " ✓" : ""}</div>
+        ${l.linkedin_profile ? (li ? `<a class="small" href="${esc(li.url)}" target="_blank" rel="noopener">LinkedIn</a>` : `<span class="small muted">LinkedIn ID not found</span>`) : ""}</td>
+    <td>${s ? esc(s.explanation) : `<span class="err">${esc(l.error)}</span>`}${s?.recommendation ? `<div><b>→ ${esc(s.recommendation)}</b></div>` : ""}
+        ${s ? `<details><summary>breakdown</summary><div class="small">${esc(JSON.stringify({...s.company_fit.breakdown, ...s.person_fit.breakdown}))}${s.disqualified_reason ? "<br>" + esc(s.disqualified_reason) : ""}</div></details>` : ""}</td>
+    <td class="small">${st || '<span class="muted">—</span>'}</td>
+    <td class="small">${ev.slice(0, 6).map(e => `<div><a href="${esc(e.source_url)}" target="_blank" rel="noopener" title="${esc(e.fact)}">${esc(new URL(e.source_url).hostname)}</a></div>`).join("")}</td>
+    <td>${s ? `<button class="secondary small" onclick="override('${l.id}')">Override</button>` : ""}</td>
+  </tr>`;
+}
+
+async function override(leadId) {
+  const category = prompt("New category (ideal, good, wrong_contact, contact_not_found, not_a_fit):");
+  if (!category) return;
+  const reason = prompt("Reason (required):");
+  if (!reason) return;
+  try { await post(`/lists/${currentList}/leads/${leadId}/override`, {category, reason}); refresh(); } catch (e) { alert(e.message); }
+}
+
+loadIcps(); loadLists();
+</script>
+</body>
+</html>

@@ -1,0 +1,39 @@
+Extract facts about the company "{{ company_name }}"{% if domain %} ({{ domain }}){% endif %} and compare them to an
+Ideal Customer Profile.
+
+Use only the provided text. If a field is not supported by the text, return null (or an empty list).
+Every fact must carry the `source_url` of the document it came from, copied exactly from the SOURCE headers below.
+Do not use outside knowledge about the company.
+
+Fields:
+- `industry` / `sub_industry`: what the company does, in plain words.
+- `industry_match`: compare the company's industry to the ICP lists.
+  "exact" = clearly one of the target industries; "related" = adjacent/closely related to a target industry;
+  "excluded" = matches an excluded industry; "none" = clearly unrelated; "unknown" = text is insufficient.
+- `employee_estimate`: a single number of employees if the text states or clearly implies it (e.g. "1,001-5,000
+  employees" → use the midpoint and set `employee_range` to "1001-5000"). `size_confidence`: "high" if an explicit
+  number from the company itself, "medium" for a third-party snippet, "low" otherwise.
+- `locations`: countries/cities where the company is headquartered or operates.
+- `matched_icp_locations`: the ICP target locations (copy exact strings from the list) that the company's locations
+  fall inside. `matched_excluded_locations`: same for excluded locations.
+- `signals`: for each ICP need signal that the text supports, return its `signal_index` (the number in brackets in
+  the ICP list), a short concrete detail (numbers if available) and the source_url. Omit signals with no support.
+  Judge by meaning, not exact wording (e.g. "10,000+ nurses talent pool" or "1,100 open jobs" support high-volume
+  hiring; "adding 5,800 beds" or "40 new stores" support expansion).
+
+## ICP
+Target industries: {{ icp.company_criteria.industries | join("; ") or "(any)" }}
+Excluded industries: {{ icp.company_criteria.excluded_industries | join("; ") or "(none)" }}
+Target locations: {{ icp.company_criteria.locations | join("; ") or "(any)" }}
+Excluded locations: {{ icp.company_criteria.excluded_locations | join("; ") or "(none)" }}
+Need signals:
+{% for s in icp.company_criteria.need_signals %}
+[{{ loop.index0 }}] {{ s.signal }}: {{ s.description }}
+{% endfor %}
+
+## Provided text
+{% for doc in sources %}
+=== SOURCE [{{ doc.source_type }}] {{ doc.url }}{% if doc.title %} — {{ doc.title }}{% endif %} ===
+{{ doc.text }}
+
+{% endfor %}

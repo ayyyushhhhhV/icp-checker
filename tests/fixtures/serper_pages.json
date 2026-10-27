@@ -1,0 +1,18 @@
+{
+  "https://acme.com": {
+    "markdown": "# Acme Retail\n\nAcme Retail runs 300 fashion stores across India and the UAE with 4,000 employees. [About us](https://acme.com/about) [Careers](https://acme.com/careers)\n\nWe opened 40 new stores in Dubai and Pune this year as part of our expansion. Our headquarters is in Bengaluru, India. Shop online or visit a store near you. Quality clothing at fair prices since 1998.",
+    "metadata": {"title": "Acme Retail"}
+  },
+  "https://acme.com/careers": {
+    "markdown": "# Careers at Acme\n\nWe are hiring 140 store associates and 25 store managers across India. Join our growing team. Open roles are updated weekly; apply online. Benefits include health cover, staff discounts and training programmes for new joiners across all regions.",
+    "metadata": {"title": "Careers"}
+  },
+  "https://acme.com/about": {
+    "markdown": "# About Acme\n\nFounded in 1998 in Bengaluru, Acme Retail is one of India's leading apparel retailers with 4,000 employees and stores in India and the UAE. Our mission is affordable fashion for everyone, delivered through our stores and online channels.",
+    "metadata": {"title": "About"}
+  },
+  "https://globex.com": {
+    "markdown": "# Globex Staffing\n\nGlobex is a staffing agency supplying temporary workers to factories in China. We place 10,000 contractors a year with manufacturing clients across Shenzhen and Guangzhou. Contact our recruitment consultants today for flexible staffing solutions.",
+    "metadata": {"title": "Globex Staffing"}
+  }
+}

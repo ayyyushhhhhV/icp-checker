@@ -1,0 +1,34 @@
+Draft an Ideal Customer Profile (ICP) for a B2B sales team.
+
+Use only the provided text. Do not invent customer names, numbers or facts that are not supported by it.
+Where the text gives no basis for a field, return null (or an empty list) instead of guessing — except
+weights and thresholds, for which you must propose sensible defaults.
+
+Rules:
+- `need_signals`: observable signals (visible on a company website, careers page or in news) that suggest the
+  company needs this offering right now. 2–5 items.
+- `target_roles`: ordered by preference (best buyer first). 2–4 roles. Each role has 2–4 realistic title examples.
+  `role_type` is "buyer" for people who own the budget/decision, "influencer" for people who shape it.
+- `function` must be one of: {{ functions | join(", ") }}.
+- seniority levels (low→high): intern, entry, senior_ic, manager, director, vp, c_level, owner.
+- weights: integers that sum to exactly 100. Default: industry 20, size 15, location 10, need_signals 15,
+  function 15, seniority 15, role_type 10. Adjust only if the text clearly justifies it.
+- thresholds default: company_fit_min_pct 50, ideal_min_total 75, good_min_total 55, person_fit_min_pct 40.
+
+Team: {{ team }}
+
+## Offering description
+{{ offering_text }}
+
+{% if answers %}
+## Follow-up answers
+{% for q, a in answers.items() %}
+- {{ q }}: {{ a }}
+{% endfor %}
+{% endif %}
+{% if won_companies %}
+## Companies we have won deals with
+{% for c in won_companies %}
+- {{ c }}
+{% endfor %}
+{% endif %}

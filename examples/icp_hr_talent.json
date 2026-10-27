@@ -1,0 +1,105 @@
+{
+  "id": "344c6b57-be3d-4c31-99e2-3d5c9d6b11ed",
+  "team": "hr_talent",
+  "name": "AI Recruiter — frontline hiring (India/UAE)",
+  "version": 0,
+  "status": "draft",
+  "offering": {
+    "product": "AI Associate Recruiter",
+    "problems_solved": [
+      "Slow screening for high-volume frontline roles",
+      "Recruiter workload"
+    ],
+    "outcomes": [
+      "Faster time-to-hire",
+      "Fewer no-shows"
+    ]
+  },
+  "company_criteria": {
+    "industries": [
+      "Retail",
+      "Quick commerce / e-commerce",
+      "Logistics",
+      "Hospitals / healthcare providers"
+    ],
+    "excluded_industries": [
+      "Staffing and recruitment agencies"
+    ],
+    "size_min_employees": 200,
+    "size_max_employees": 50000,
+    "locations": [
+      "India",
+      "UAE"
+    ],
+    "excluded_locations": [],
+    "need_signals": [
+      {
+        "signal": "high-volume hiring",
+        "description": "20+ open frontline roles"
+      },
+      {
+        "signal": "recent expansion",
+        "description": "new stores, hubs, hospitals or cities"
+      }
+    ]
+  },
+  "role_criteria": {
+    "target_roles": [
+      {
+        "title_examples": [
+          "Head of Talent Acquisition",
+          "TA Director",
+          "VP Talent Acquisition"
+        ],
+        "function": "talent_acquisition",
+        "seniority_min": "director",
+        "role_type": "buyer"
+      },
+      {
+        "title_examples": [
+          "CHRO",
+          "Chief People Officer",
+          "VP HR"
+        ],
+        "function": "hr",
+        "seniority_min": "vp",
+        "role_type": "buyer"
+      },
+      {
+        "title_examples": [
+          "Talent Acquisition Manager",
+          "Recruitment Manager"
+        ],
+        "function": "talent_acquisition",
+        "seniority_min": "manager",
+        "role_type": "influencer"
+      }
+    ],
+    "deprioritized_functions": [
+      "finance",
+      "it"
+    ],
+    "excluded_seniority": [
+      "intern",
+      "entry"
+    ]
+  },
+  "weights": {
+    "industry": 20,
+    "size": 15,
+    "location": 10,
+    "need_signals": 15,
+    "function": 15,
+    "seniority": 15,
+    "role_type": 10
+  },
+  "thresholds": {
+    "company_fit_min_pct": 50,
+    "ideal_min_total": 75,
+    "good_min_total": 55,
+    "person_fit_min_pct": 40
+  },
+  "created_by": null,
+  "approved_by": null,
+  "approved_at": null
+}

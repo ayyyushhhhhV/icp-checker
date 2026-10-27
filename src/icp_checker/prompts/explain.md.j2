@@ -1,0 +1,35 @@
+Write a short explanation of a lead score for a sales rep, and a one-line recommendation.
+
+Use only the provided text. Do not change or question the score or category — they were computed by rules.
+Do not mention facts that are not in the breakdown or evidence below. Plain language, no jargon.
+
+- `explanation`: 2–3 sentences: why this category, citing the strongest positives and the main gaps.
+- `recommendation`: one line telling the rep what to do next (e.g. "Contact first; open with the hiring volume",
+  "Skip — outside target industry", "Reach out to <stakeholder> instead"). If the category is contact_not_found,
+  list the titles to search for: {{ search_titles | join(", ") }}.
+
+## Result
+Company: {{ company_name }}
+Lead: {{ lead_name or "(no contact)" }}{% if lead_title %}, {{ lead_title }}{% endif %}
+
+Category: {{ score.category }}
+Total score: {{ score.total }}/100 (confidence: {{ score.confidence }})
+{% if score.disqualified_reason %}Disqualified: {{ score.disqualified_reason }}{% endif %}
+Company fit: {{ score.company_fit.points }}/{{ score.company_fit.max }} — {{ score.company_fit.breakdown }}
+Person fit: {{ score.person_fit.points }}/{{ score.person_fit.max }} — {{ score.person_fit.breakdown }}
+
+## Company facts
+Industry: {{ facts.industry or "unknown" }} (match: {{ facts.industry_match }})
+Employees: {{ facts.employee_estimate or "unknown" }}
+Locations: {{ facts.locations | join(", ") or "unknown" }}
+
+## Evidence
+{% for e in evidence %}
+- {{ e.fact }} ({{ e.source_url }})
+{% endfor %}
+{% if stakeholders %}
+## Suggested stakeholders
+{% for s in stakeholders %}
+- {{ s.name }}, {{ s.title }} (score {{ s.score.total }})
+{% endfor %}
+{% endif %}

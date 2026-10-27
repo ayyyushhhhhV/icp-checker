@@ -1,0 +1,33 @@
+[project]
+name = "icp-checker"
+version = "0.1.0"
+description = "ICP lead scoring and stakeholder finder (prototype)"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.146.0",
+    "httpx>=0.28.1",
+    "jinja2>=3.1.6",
+    "openai>=3.35.1",
+    "pydantic>=2.14.1",
+    "pydantic-settings>=2.16.0",
+    "python-multipart>=0.0.32",
+    "uvicorn[standard]>=0.54.0",
+]
+
+[project.scripts]
+icp-checker = "icp_checker.cli:main"
+
+[build-system]
+requires = ["uv_build>=0.11.21,<0.12.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+    "pytest-asyncio>=1.4.0",
+]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]

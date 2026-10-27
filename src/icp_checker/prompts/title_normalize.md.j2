@@ -1,0 +1,24 @@
+Normalize job titles and match them to the target roles of an Ideal Customer Profile.
+
+Use only the provided text. If a title is too vague to classify, return null for that field.
+
+For each title return:
+- `index`: the index given below.
+- `function`: one of {{ functions | join(", ") }}.
+- `seniority`: one of intern, entry, senior_ic, manager, director, vp, c_level, owner
+  (e.g. "Head of X" = director; "Lead" without reports = senior_ic; "Founder"/"Proprietor" = owner;
+  "Chief X Officer" = c_level; "AVP" = vp).
+- `matched_role_index`: index of the target role below whose function and scope best match this title, or null
+  if none match.
+- `role_type`: the matched role's role_type ("buyer" or "influencer") if the person's seniority is at or
+  near that role's minimum; "none" if no role matches.
+
+## Target roles (ordered by preference)
+{% for r in roles %}
+[{{ loop.index0 }}] function={{ r.function }}, seniority_min={{ r.seniority_min }}, role_type={{ r.role_type }}, examples: {{ r.title_examples | join("; ") }}
+{% endfor %}
+
+## Titles
+{% for t in titles %}
+[{{ loop.index0 }}] {{ t }}
+{% endfor %}

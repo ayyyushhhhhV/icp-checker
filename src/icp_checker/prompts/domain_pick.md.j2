@@ -1,0 +1,13 @@
+Pick the official website domain of the company "{{ company_name }}" from these Google search results.
+
+Use only the provided text. Ignore directories, social networks, job boards, review sites and news sites
+(e.g. linkedin.com, crunchbase.com, wikipedia.org, glassdoor, indeed, naukri, zoominfo, facebook, x.com).
+Return the bare domain (e.g. "example.com") and the `source_url` of the result you chose.
+If no result is clearly the company's own website, return null for both.
+
+## Search results
+{% for r in results %}
+- title: {{ r.title }}
+  link: {{ r.link }}
+  snippet: {{ r.snippet }}
+{% endfor %}
